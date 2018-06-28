@@ -1,0 +1,11 @@
+ancho_tiempo=3
+tiempo_sin_movimiento=2
+tiempo_frame_referencia=3
+graficos=True
+x1=0
+x2=1000
+y1=0
+y2=1000
+usuario=ALPR
+clave=PASSALPR
+nombre_base_de_datos=control_point
