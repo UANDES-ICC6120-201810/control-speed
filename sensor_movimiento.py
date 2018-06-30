@@ -25,23 +25,15 @@ usuario = ""
 clave = ""
 nombre_base_de_datos = ""
 
-# Datos para decidir si se detuvo el objeto
-cola_movimiento_frames = deque([])
-cola_fecha_frames = deque([])
+# Datos para guardar en la base de Datos
 hora_guardar_movimiento_cola = datetime.datetime.now()
-ancho_tiempo = 0
-tiempo_sin_movimiento = 0
 
 # Se inicializan las variables con el documento externo
 archivo = open("ParametrosSensor", 'r')
 for line in archivo:
     line = line.replace('\n', ' ')
     elementos = line.split('=')
-    if elementos[0] == "ancho_tiempo":
-        ancho_tiempo = int(elementos[1])
-    elif elementos[0] == "tiempo_sin_movimiento":
-        tiempo_sin_movimiento = int(elementos[1])
-    elif elementos[0] == "tiempo_frame_referencia":
+    if elementos[0] == "tiempo_frame_referencia":
         tiempo_frame_referencia = int(elementos[1])
     elif elementos[0] == "graficos":
         if elementos[1] == "True":
@@ -66,6 +58,7 @@ for line in archivo:
 # Coneccion con base de datos
 db = MySQLdb.connect("localhost", usuario, clave, nombre_base_de_datos)
 cursor = db.cursor()
+
 
 camara_imagen = True
 # Loop infinito para registrar movimiento
@@ -114,28 +107,17 @@ while True:
     if hora_guardar_movimiento_cola <= datetime.datetime.now():
         if hay_movimiento:
             # Hay movimiento
-            cola_movimiento_frames.appendleft(True)
+            # Se guarda de que hubo detencion en la Base de Datos
+            cursor.execute("INSERT INTO bus_speed (speed) VALUES (1);")
+            print "Guardado: Se detuvo el vehiculo en el tiempo"
+
         elif not hay_movimiento:
             # No hay movimiento
-            cola_movimiento_frames.appendleft(False)
-        cola_fecha_frames.appendleft(datetime.datetime.now())
+            # Se guarda de que no hubo detencion en la Base de Datos
+            cursor.execute("INSERT INTO bus_speed (speed) VALUES (1);")
+            print "Guardado: No se detuvo el vehiculo en el tiempo"
+
         hora_guardar_movimiento_cola += datetime.timedelta(seconds=1)
-
-        # Se verifica que el tamano de la cola es suficiente para comenzar a almacenar informacion a la base de datos
-        if len(cola_movimiento_frames) == ancho_tiempo * 2 + 1:
-            fecha_guardar = cola_fecha_frames[ancho_tiempo]
-            total_no_movimiento = cola_movimiento_frames.count(False)
-            if total_no_movimiento >= tiempo_sin_movimiento:
-                # Se guarda de que hubo detencion del objeto junto con la fecha en la Base de Datos
-                cursor.execute("INSERT INTO bus_speed (speed) VALUES (1);")
-                print "Guardado: Se detuvo el vehiculo en el tiempo", fecha_guardar
-
-            elif total_no_movimiento < tiempo_sin_movimiento:
-                # Se guarda de que no hubo detencion del objeto junto con la fecha en la Base de Datos
-                cursor.execute("INSERT INTO bus_speed (speed) VALUES (1);")
-                print "Guardado: No se detuvo el vehiculo en el tiempo", fecha_guardar
-            cola_fecha_frames.pop()
-            cola_movimiento_frames.pop()
 
 # Se corta la conexion con la camara y se destruyen las vistas de esta
 camara.release()
