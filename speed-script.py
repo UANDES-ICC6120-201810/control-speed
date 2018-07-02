@@ -2,7 +2,19 @@ import datetime
 import time
 import cv2
 from collections import deque
-import MySQLdb
+import mysql.connector
+
+
+def connect_to_db(conn_params):
+    while True:
+        try:
+            print "[Info] Connecting to db"
+            connection = mysql.connector.connect(buffered=True, **conn_params)
+            print "[Info] Connection successful!"
+            return connection
+        except mysql.connector.errors.InterfaceError:
+            print "[Error] Couldn't connect to database. Retrying..."
+            sleep(1)
 
 # Datos para la camara
 camara = cv2.VideoCapture(0)
@@ -55,10 +67,15 @@ for line in archivo:
     elif elementos[0] == "nombre_base_de_datos":
         nombre_base_de_datos = elementos[1]
 
-# Coneccion con base de datos
-db = MySQLdb.connect("localhost", usuario, clave, nombre_base_de_datos)
-cursor = db.cursor()
+CONN_PARAMS = {
+  'user': 'ALPR',
+  'password': 'PASSALPR',
+  'host': 'docker-db',
+  'database': 'control_point'
+}
 
+# Coneccion con base de datos
+connection = connect_to_db(CONN_PARAMS).cursor()
 
 camara_imagen = True
 # Loop infinito para registrar movimiento
