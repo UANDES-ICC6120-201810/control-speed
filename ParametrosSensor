@@ -4,6 +4,8 @@ seconds_between_motion_detection=3
 
 seconds_between_frames=1
 
+min_area_to_be_considered_movement=500
+
 # Camera url
 # camera_url=rtsp://taller:taller2018@192.168.1.10:88/videoMain
 camera_url=0

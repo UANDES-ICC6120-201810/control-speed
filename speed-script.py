@@ -20,7 +20,7 @@ def main():
         if should_check_for_movement:
             current_frame = get_current_frame(camera)
 
-            movement_detected = detect_movement(reference_frame, current_frame)
+            movement_detected = detect_movement(reference_frame, current_frame, params_dict)
 
             if movement_detected:
                 post_movement_event_to_db(params_dict)
@@ -95,11 +95,11 @@ def cut_camera_frame(frame, params_dict):
 
     return frame
 
-def detect_movement(reference_frame, frame):
+def detect_movement(reference_frame, frame, params_dict):
     contours = get_frame_contours(reference_frame, current_frame)
 
     for contour in contours:
-        if cv2.contourArea(contour) >= 500:
+        if cv2.contourArea(contour) >= params_dict['min_area_to_be_considered_movement']:
             return True
 
     return False
