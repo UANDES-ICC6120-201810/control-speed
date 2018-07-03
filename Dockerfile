@@ -13,7 +13,6 @@ RUN apt-get update \
     && apt-get install -y python2.7 \
                           python-pip \
                           nano \
-# Doesn't work... needs user input
                           python-opencv \
     && pip install mysql-connector \
                    requests
