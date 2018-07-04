@@ -17,4 +17,4 @@ RUN apt-get update \
     && pip install mysql-connector \
                    requests
 
-CMD python /root/speed-script.py
+CMD python -u /root/speed-script.py
